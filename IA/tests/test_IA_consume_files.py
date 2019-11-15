@@ -9,7 +9,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 from nose.tools import assert_equal
 from zipfile import ZipFile
 
-from consume_files import consume_files
+from IA.IA_consume_files import consume_files
 
 
 
@@ -24,7 +24,7 @@ class TestIAFiles(unittest.TestCase):
 
     @responses.activate
     def test_file_dump(self):
-        with open('tests/fixtures/sgg32.zip') as zipfile:
+        with open('fixtures/sgg32.zip', 'rb') as zipfile:
             responses.add(
                 responses.Response(
                     responses.GET,
@@ -43,7 +43,7 @@ class TestIAFiles(unittest.TestCase):
 
     @responses.activate
     def test_file_dump_multiple_levels(self):
-        with open('tests/fixtures/jj81a.zip') as zipfile:
+        with open('fixtures/jj81a.zip', 'rb') as zipfile:
             responses.add(
                 responses.Response(
                     responses.GET,
