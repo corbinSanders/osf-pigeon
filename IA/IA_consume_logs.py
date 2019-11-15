@@ -133,4 +133,4 @@ def create_logs(guid, directory, pagesize, bearer_token, base_url=None, logs_url
 
 if __name__ == '__main__':
 
-    main(default_args=False)
+    main()
