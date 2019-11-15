@@ -8,17 +8,17 @@ import json
 HERE = os.path.dirname(os.path.abspath(__file__))
 from nose.tools import assert_equal
 
-from consume_logs import create_logs
+from IA.IA_consume_logs import create_logs
 
 
 def log_files():
-	with open(os.path.join(HERE, 'tests/fixtures/njs82.json')) as json_file:
+	with open(os.path.join(HERE, 'fixtures/njs82.json')) as json_file:
 		return json.loads(json_file.read())
 
 def log_files_two_pages():
-	with open(os.path.join(HERE, 'tests/fixtures/8jpzs-1.json')) as json_file:
+	with open(os.path.join(HERE, 'fixtures/8jpzs-1.json')) as json_file:
 		page1 = json.loads(json_file.read())
-	with open(os.path.join(HERE, 'tests/fixtures/8jpzs-2.json')) as json_file:
+	with open(os.path.join(HERE, 'fixtures/8jpzs-2.json')) as json_file:
 		page2 = json.loads(json_file.read())
 
 	return page1, page2
@@ -46,7 +46,7 @@ class TestIALogs(unittest.TestCase):
 
 		create_logs('njs82', '.', 100, 'asdfasdfasdgfasg', 'http://localhost:8000/')
 
-		with open(os.path.join(HERE, 'tests/fixtures/njs82.json')) as json_file:
+		with open(os.path.join(HERE, 'fixtures/njs82.json')) as json_file:
 			source_json = json.loads(json_file.read())
 		with open(os.path.join(HERE, 'njs82/logs/njs82-1.json')) as json_file:
 			target_json = json.loads(json_file.read())
@@ -74,9 +74,9 @@ class TestIALogs(unittest.TestCase):
 
 		create_logs('8jpzs', '.', 3, 'asdfasdfasdgfasg', 'http://localhost:8000/')
 
-		with open(os.path.join(HERE, 'tests/fixtures/8jpzs-1.json')) as json_file:
+		with open(os.path.join(HERE, 'fixtures/8jpzs-1.json')) as json_file:
 			source_json_1 = json.loads(json_file.read())
-		with open(os.path.join(HERE, 'tests/fixtures/8jpzs-2.json')) as json_file:
+		with open(os.path.join(HERE, 'fixtures/8jpzs-2.json')) as json_file:
 			source_json_2 = json.loads(json_file.read())
 		with open(os.path.join(HERE, '8jpzs/logs/8jpzs-1.json')) as json_file:
 			target_json_1 = json.loads(json_file.read())
