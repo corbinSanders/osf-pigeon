@@ -35,10 +35,18 @@ BASE_URL = 'https://files.osf.io/'
 def consume_files(guid, token, directory, base_url=BASE_URL):
 
     zip_url = '{}v1/resources/{}/providers/osfstorage/?zip='.format(base_url, guid)
-    path = os.path.join(directory,guid)
-    os.mkdir(path)
-    path = os.path.join(path,'files')
-    os.mkdir(path)
+    path = os.path.join(directory, guid)
+    try:
+        os.mkdir(path)
+    except FileExistsError:
+        pass
+    path = os.path.join(path, 'files')
+
+    try:
+        os.mkdir(path)
+    except FileExistsError:
+        pass
+
     if token:
         auth_header = {'Authorization': 'Bearer {}'.format(token)}
     else:
