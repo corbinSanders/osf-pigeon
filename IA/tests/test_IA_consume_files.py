@@ -35,10 +35,10 @@ class TestIAFiles(unittest.TestCase):
             )
 
 
-        consume_files('sgg32', 'asdfasdfasdgfasg', '.')
+        consume_files('sgg32', 'asdfasdfasdgfasg', HERE)
 
-        assert os.path.isdir(os.path.join('sgg32/files'))
-        assert os.path.isfile(os.path.join('sgg32/files/test.txt'))
+        assert os.path.isdir(os.path.join(HERE, 'sgg32/files'))
+        assert os.path.isfile(os.path.join(HERE, 'sgg32/files/test.txt'))
 
 
     @responses.activate
@@ -54,9 +54,9 @@ class TestIAFiles(unittest.TestCase):
             )
 
 
-        consume_files('jj81a', None, '.')
+        consume_files('jj81a', None, HERE)
 
-        assert os.path.isdir(os.path.join('jj81a/files/Folder 1'))
-        assert os.path.isfile(os.path.join('jj81a/files/Folder 1/test.txt'))
-        assert os.path.isfile(os.path.join('jj81a/files/Folder 1/Folder two/test3.txt'))
+        assert os.path.isdir(os.path.join(HERE, 'jj81a/files/Folder 1'))
+        assert os.path.isfile(os.path.join(HERE, 'jj81a/files/Folder 1/test.txt'))
+        assert os.path.isfile(os.path.join(HERE, 'jj81a/files/Folder 1/Folder two/test3.txt'))
 
