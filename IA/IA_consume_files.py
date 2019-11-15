@@ -82,11 +82,7 @@ def consume_files(guid, token, directory, base_url=BASE_URL):
     os.remove(zipfile_location)
     print('File data successfully transferred!')
 
-def main(default_args=True):
-    if (default_args):
-        args = parser.parse_args(['--guid', 'default', '--directory', 'default'])
-    else:
-        args = parser.parse_args()
+def main():
     args = parser.parse_args()
     guid = args.guid
     directory = args.directory
@@ -107,4 +103,4 @@ def main(default_args=True):
 
 if __name__ == '__main__':
 
-    main(default_args=False)
+    main()
