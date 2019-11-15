@@ -48,7 +48,7 @@ class TestIALogs(unittest.TestCase):
 
 		with open(os.path.join(HERE, 'fixtures/njs82.json')) as json_file:
 			source_json = json.loads(json_file.read())
-		with open(os.path.join(HERE, 'njs82/logs/njs82-1.json')) as json_file:
+		with open(os.path.join(HERE, 'fixtures/logs/njs82-1.json')) as json_file:
 			target_json = json.loads(json_file.read())
 
 		assert source_json['data'] == target_json
@@ -78,9 +78,9 @@ class TestIALogs(unittest.TestCase):
 			source_json_1 = json.loads(json_file.read())
 		with open(os.path.join(HERE, 'fixtures/8jpzs-2.json')) as json_file:
 			source_json_2 = json.loads(json_file.read())
-		with open(os.path.join(HERE, '8jpzs/logs/8jpzs-1.json')) as json_file:
+		with open(os.path.join(HERE, 'fixtures/logs/8jpzs-1.json')) as json_file:
 			target_json_1 = json.loads(json_file.read())
-		with open(os.path.join(HERE, '8jpzs/logs/8jpzs-2.json')) as json_file:
+		with open(os.path.join(HERE, 'fixtures/logs/8jpzs-2.json')) as json_file:
 			target_json_2 = json.loads(json_file.read())
 
 		source_json = source_json_1['data']+ source_json_2['data']
