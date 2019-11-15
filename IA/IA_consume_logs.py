@@ -110,7 +110,6 @@ def create_logs(guid, directory, pagesize, bearer_token, base_url=None, logs_url
     if not os.path.exists(path):
         os.mkdir(path)
     path = os.path.join(path,'logs')
-
     try:
         os.mkdir(path)
     except FileExistsError:
