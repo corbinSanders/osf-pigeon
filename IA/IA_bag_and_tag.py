@@ -1,9 +1,11 @@
+import re
 import os
 import bagit
 import argparse
 import requests
 from datacite import DataCiteMDSClient
 import settings
+import zipfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -33,7 +35,15 @@ def bag_and_tag(xml_metadata, destination):
     with open(os.path.join(HERE, destination, 'datacite.xml'), 'w') as fp:
         fp.write(xml_metadata)
 
-    bagit.make_bag(os.path.join(HERE, destination))
+    path = os.path.join(HERE, destination)
+    bagit.make_bag(path)
+
+    with zipfile.ZipFile('bag.zip', 'w') as zip_file:
+        for root, dirs, files in os.walk(path):
+            for file in files:
+                file_path = os.path.join(root, file)
+                file_name = re.sub(f"^{path}", "", file_path)
+                zip_file.write(file_path, arcname=file_name)
 
 
 def main(guid, destination):
