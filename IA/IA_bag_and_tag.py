@@ -31,6 +31,10 @@ def bag_and_tag(xml_metadata, destination):
     path = os.path.join(HERE, destination)
     bagit.make_bag(path)
 
+    bag = bagit.Bag(path)
+    assert bag.is_valid()
+
+
 def zip_bag(destination):
     path = os.path.join(HERE, destination)
     with zipfile.ZipFile('bag.zip', 'w') as zip_file:
