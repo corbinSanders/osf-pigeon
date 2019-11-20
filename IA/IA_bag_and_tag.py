@@ -31,6 +31,8 @@ def bag_and_tag(xml_metadata, destination):
     path = os.path.join(HERE, destination)
     bagit.make_bag(path)
 
+def zip_bag(destination):
+    path = os.path.join(HERE, destination)
     with zipfile.ZipFile('bag.zip', 'w') as zip_file:
         for root, dirs, files in os.walk(path):
             for file in files:
@@ -39,10 +41,13 @@ def bag_and_tag(xml_metadata, destination):
                 zip_file.write(file_path, arcname=file_name)
 
 
-def main(guid, destination):
+def main(guid, destination, zip=False):
     doi = build_doi(guid)
     xml_metadata = get_datacite_metadata(doi)
     bag_and_tag(xml_metadata, destination)
+
+    if zip:
+        zip_bag(destination)
 
 
 if __name__ == '__main__':
@@ -59,7 +64,13 @@ if __name__ == '__main__':
         help='The parent directory a the file is copied into.',
         required=True,
     )
+    parser.add_argument(
+        '-z',
+        '--zip',
+        help='A boolean representing if the bag is zipped.',
+    )
     args = parser.parse_args()
     guid = args.guid
     destination = args.destination
-    main(guid, destination)
+    zip = args.zip
+    main(guid, destination, zip)
