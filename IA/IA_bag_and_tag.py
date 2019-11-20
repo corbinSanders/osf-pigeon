@@ -2,7 +2,6 @@ import re
 import os
 import bagit
 import argparse
-import requests
 from datacite import DataCiteMDSClient
 import settings
 import zipfile
