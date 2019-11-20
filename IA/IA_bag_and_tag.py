@@ -24,13 +24,6 @@ def get_datacite_metadata(doi):
     return client.metadata_get(doi)
 
 
-def fetch_node(guid):
-    return requests.get(
-        f'{settings.BASE_URL}v2/registrations/{guid}/'
-        f'?embed=provider&embed=contributors&embed=license',
-    ).json()['data']
-
-
 def bag_and_tag(xml_metadata, destination):
     with open(os.path.join(HERE, destination, 'datacite.xml'), 'w') as fp:
         fp.write(xml_metadata)
