@@ -93,7 +93,7 @@ def main():
         # Setting default to current directory
         directory = '.'
     if not pagesize:
-        pagesize = 100
+        pagesize = settings.PAGE_SIZE
 
     create_logs(guid, directory, pagesize, bearer_token)
 

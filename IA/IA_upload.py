@@ -83,6 +83,9 @@ async def chunked_upload(bucket_name: str, filename: str, file_content: bytes):
 
     await asyncio.gather(*tasks)
 
+def run_IA_upload(bucket, source):
+    ayncio.run(gather_and_upload(bucket, source))
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -102,4 +105,4 @@ if __name__ == '__main__':
     bucket = args.bucket
     source = args.source
 
-    asyncio.run(gather_and_upload(bucket, source))
+    run_IA_upload(bucket, source)
