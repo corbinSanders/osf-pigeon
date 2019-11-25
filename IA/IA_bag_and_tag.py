@@ -56,7 +56,7 @@ def main(guid, destination, zip=False):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '-id',
+        '-g',
         '--guid',
         help='The guid of the registration that you want to get datacite metadata for.',
         required=True,
