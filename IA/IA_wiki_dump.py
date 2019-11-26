@@ -42,7 +42,6 @@ async def main(guid, destination=''):
 
     await asyncio.gather(*write_tasks)
 
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument(
