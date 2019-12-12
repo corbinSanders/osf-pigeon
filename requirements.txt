@@ -14,6 +14,7 @@ Faker==2.0.3
 flake8==3.7.9
 futures==2.1.5
 idna==2.8
+internetarchive==1.9.0
 importlib-metadata==0.23
 jmespath==0.9.4
 jsonschema==3.1.1

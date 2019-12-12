@@ -2,6 +2,9 @@ import os
 import argparse
 import requests
 import boto
+import json
+import internetarchive
+from xml.dom import minidom
 from boto.s3.connection import OrdinaryCallingFormat
 from boto.s3.multipart import MultiPartUpload
 import asyncio
@@ -26,7 +29,7 @@ def mp_from_ids(mp_id: str, mp_keyname: str, bucket: str) -> MultiPartUpload:
     return mp
 
 
-async def gather_and_upload(bucket_name: str, parent: str):
+async def gather_and_upload(bucket_name: str, parent: str, guid: str):
     '''
     This script traverses through a directory uploading everything in it to Internet Archive.
     '''
@@ -40,13 +43,39 @@ async def gather_and_upload(bucket_name: str, parent: str):
             with open(path, 'rb') as fp:
                 data = fp.read()
                 size = len(data)
-                url_path = path.split(parent+'/')[1]
+                url_path = path.split(parent + '/')[1]
                 if size > CHUNK_SIZE:
                     tasks.append(chunked_upload(bucket_name, url_path, data))
                 else:
                     tasks.append(upload(bucket_name, url_path, data))
 
     await asyncio.gather(*tasks)
+    upload_metadata(bucket_name, guid, parent)
+
+
+def upload_metadata(bucket_name: str, guid: str, directory: str):
+    session_data = {'s3': {'access': IA_ACCESS_KEY, 'secret': IA_SECRET_KEY}}
+    session = internetarchive.get_session(config=session_data)
+
+    node_path = os.path.join(HERE, directory, 'data', guid, 'node', '{}.json'.format(guid))
+    with open(node_path, 'r') as f:
+        node_json = json.loads(f.read())['attributes']
+
+    xml_path = os.path.join(HERE, directory, 'data', 'datacite.xml')
+    xml_data = minidom.parse(xml_path)
+    creators = xml_data.getElementsByTagName('creatorName')
+
+    item = session.get_item(bucket_name)
+    item.modify_metadata(dict(
+        title=node_json['title'],
+        description=node_json['description'],
+        creator=creators[0].firstChild.data,
+        date=node_json['date_created'],
+        doi=node_json['article_doi'],
+        licenseurl=node_json['node_license'],
+        subjects=', '.join(node_json['subjects']),
+        contributor='Center for Open Science',
+    ))
 
 
 async def upload(bucket_name: str, filename: str, file_content: bytes):
