@@ -35,6 +35,7 @@ async def gather_and_upload(bucket_name: str, parent: str, guid: str):
     '''
 
     tasks = []
+    upload_metadata(bucket_name, guid, parent)
 
     directory_path = os.path.join(HERE, parent)
     for root, dirs, files in os.walk(directory_path):
@@ -50,7 +51,6 @@ async def gather_and_upload(bucket_name: str, parent: str, guid: str):
                     tasks.append(upload(bucket_name, url_path, data))
 
     await asyncio.gather(*tasks)
-    upload_metadata(bucket_name, guid, parent)
 
 
 def upload_metadata(bucket_name: str, guid: str, directory: str):
@@ -72,11 +72,10 @@ def upload_metadata(bucket_name: str, guid: str, directory: str):
         creator=creators[0].firstChild.data,
         date=node_json['date_created'],
         doi=node_json['article_doi'],
-        licenseurl=node_json['node_license'],
         subjects=', '.join(node_json['subjects']),
         contributor='Center for Open Science',
     ))
-
+    print ("Metadata updated")
 
 async def upload(bucket_name: str, filename: str, file_content: bytes):
     headers = {
@@ -91,6 +90,7 @@ async def upload(bucket_name: str, filename: str, file_content: bytes):
     if resp.status_code != 200:
         error_json = dict(xmltodict.parse(resp.content))
         raise requests.exceptions.HTTPError(error_json)
+    print ("Done with {}".format(filename))
 
 
 async def chunked_upload(bucket_name: str, filename: str, file_content: bytes):
@@ -126,6 +126,7 @@ async def chunked_upload(bucket_name: str, filename: str, file_content: bytes):
     await asyncio.gather(*tasks)
 
     mp.complete_upload()
+    print ("Done with chunked {}".format(filename))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

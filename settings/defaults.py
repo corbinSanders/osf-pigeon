@@ -4,8 +4,8 @@ DOI_FORMAT = '10.70102/fk2osf.io/{guid}'
 
 DATACITE_USERNAME = ''
 DATACITE_PASSWORD = ''
-DATACITE_URL = 'https://doi.test.datacite.org/'
 DATACITE_PREFIX = '10.70102'  # Datacite's test DOI prefix -- update in production
+DATACITE_URL = 'https://mds.datacite.org/'
 
 CHUNK_SIZE = 1000
 PAGE_SIZE = 100
