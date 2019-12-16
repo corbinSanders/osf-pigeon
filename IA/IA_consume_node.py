@@ -34,4 +34,4 @@ def consume_node(guid, directory, bearer_token):
     with open(json_file, 'w') as json_write:
         json.dump(json_data, json_write)
 
-    print ("Node dump complete!")
+    print("Node dump complete!")

@@ -75,7 +75,8 @@ def upload_metadata(bucket_name: str, guid: str, directory: str):
         subjects=', '.join(node_json['subjects']),
         contributor='Center for Open Science',
     ))
-    print ("Metadata updated")
+    print("Metadata updated")
+
 
 async def upload(bucket_name: str, filename: str, file_content: bytes):
     headers = {
@@ -90,7 +91,7 @@ async def upload(bucket_name: str, filename: str, file_content: bytes):
     if resp.status_code != 200:
         error_json = dict(xmltodict.parse(resp.content))
         raise requests.exceptions.HTTPError(error_json)
-    print ("Done with {}".format(filename))
+    print("Done with {}".format(filename))
 
 
 async def chunked_upload(bucket_name: str, filename: str, file_content: bytes):
@@ -126,7 +127,7 @@ async def chunked_upload(bucket_name: str, filename: str, file_content: bytes):
     await asyncio.gather(*tasks)
 
     mp.complete_upload()
-    print ("Done with chunked {}".format(filename))
+    print("Done with chunked {}".format(filename))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
