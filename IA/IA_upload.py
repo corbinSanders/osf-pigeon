@@ -72,16 +72,17 @@ def upload_metadata(bucket_name: str, guid: str, directory: str):
     date_string = date_string.partition('.')[0]
     date_time = date_time.strptime("%Y-%m-%dT%H:%M:%S")
 
-
-    item.modify_metadata(dict(
+    metadata_dict = dict(
         title=node_json['title'],
         description=node_json['description'],
         creator=creators[0].firstChild.data,
         date=date_time.strftime("%Y-%m-%d"),
-        external-identifier="urn:doi:{}".format(node_json['article_doi']),
         subjects=', '.join(node_json['subjects']),
         contributor='Center for Open Science',
-    ))
+    )
+
+    metadata_dict['external-identifier'] = "urn:doi:{}".format(node_json['article_doi'])
+    item.modify_metadata(metadata_dict)
     print("Metadata updated")
 
 
