@@ -70,7 +70,7 @@ def upload_metadata(bucket_name: str, guid: str, directory: str):
 
     date_string = node_json['date_created']
     date_string = date_string.partition('.')[0]
-    date_time = date_time.strptime("%Y-%m-%dT%H:%M:%S")
+    date_time = datetime.strptime("%Y-%m-%dT%H:%M:%S")
 
     metadata_dict = dict(
         title=node_json['title'],
