@@ -4,6 +4,7 @@ import requests
 import boto
 import json
 import internetarchive
+from datetime import datetime
 from xml.dom import minidom
 from boto.s3.connection import OrdinaryCallingFormat
 from boto.s3.multipart import MultiPartUpload
@@ -66,12 +67,18 @@ def upload_metadata(bucket_name: str, guid: str, directory: str):
     creators = xml_data.getElementsByTagName('creatorName')
 
     item = session.get_item(bucket_name)
+
+    date_string = node_json['date_created']
+    date_string = date_string.partition('.')[0]
+    date_time = date_time.strptime("%Y-%m-%dT%H:%M:%S")
+
+
     item.modify_metadata(dict(
         title=node_json['title'],
         description=node_json['description'],
         creator=creators[0].firstChild.data,
-        date=node_json['date_created'],
-        doi=node_json['article_doi'],
+        date=date_time.strftime("%Y-%m-%d"),
+        external-identifier="urn:doi:{}".format(node_json['article_doi']),
         subjects=', '.join(node_json['subjects']),
         contributor='Center for Open Science',
     ))
