@@ -3,11 +3,11 @@ IA_ACCESS_KEY = 'change to valid token'
 IA_SECRET_KEY = 'change to valid token'
 
 
-DOI_FORMAT = '10.70102/fk2osf.io/{guid}'
+DOI_FORMAT = '{prefix}/fk2osf.io/{guid}'
 
 OSF_BEARER_TOKEN = ''
 
 DATACITE_USERNAME = None
 DATACITE_PASSWORD = None
 DATACITE_URL = None
-DATACITE_PREFIX = '10.70102'  # Datacite's test DOI prefix -- update in production
+DATACITE_PREFIX = '10.70102'  # Datacite's test DOI prefix

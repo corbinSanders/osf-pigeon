@@ -39,7 +39,7 @@ def gather_and_upload(item_name: str, parent: str, guid: str):
     upload_metadata(ia_item, guid, parent, session)
 
 def upload_metadata(ia_item: internetarchive.item, guid: str, directory: str, session: internetarchive.session):
-    node_path = os.path.join(HERE, directory, 'data', guid, 'node', '{}.json'.format(guid))
+    node_path = os.path.join(HERE, directory, 'data', guid, 'node', f'{guid}.json')
     with open(node_path, 'r') as f:
         node_json = json.loads(f.read())['attributes']
 
@@ -60,7 +60,8 @@ def upload_metadata(ia_item: internetarchive.item, guid: str, directory: str, se
         contributor='Center for Open Science',
     )
 
-    metadata_dict['external-identifier'] = "urn:doi:{}".format(node_json['article_doi'])
+    article_doi = node_json['article_doi']
+    metadata_dict['external-identifier'] = f'urn:doi:{article_doi}')
     ia_item.modify_metadata(metadata_dict)
     print("Metadata updated")
 
@@ -80,7 +81,7 @@ def ia_upload(ia_item: internetarchive.item, filename: str, session: internetarc
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '-b',
+        '-i',
         '--item',
         help='The name of the item you want to dump in.',
         required=True,

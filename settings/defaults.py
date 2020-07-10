@@ -1,10 +1,10 @@
 # New tokens can be found at https://archive.org/account/s3.php
 
-DOI_FORMAT = '10.70102/fk2osf.io/{guid}'
+DOI_FORMAT = '{prefix}/fk2osf.io/{guid}'
 
 DATACITE_USERNAME = ''
 DATACITE_PASSWORD = ''
-DATACITE_PREFIX = '10.70102'  # Datacite's test DOI prefix -- update in production
+DATACITE_PREFIX = '10.17605'  # Datacite's prod DOI prefix
 DATACITE_URL = 'https://mds.datacite.org/'
 
 CHUNK_SIZE = 1000
