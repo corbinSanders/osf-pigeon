@@ -31,3 +31,4 @@ class TestIANode(unittest.TestCase):
             consume_node('nt6da', 'tests', 'asdfasdfasdgfasg')
             m.assert_called_with(os.path.join(HERE, 'nt6da/node/nt6da.json'), 'w')
             mock_mkdir.assert_called_with(os.path.join(HERE, 'nt6da/node'))
+            m.return_value.write.assert_called()

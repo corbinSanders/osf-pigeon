@@ -11,14 +11,16 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 
 def consume_node(guid: str, directory: str, bearer_token: str):
-    path = os.path.join(HERE, directory, guid)
-    if not os.path.exists(path):
-        os.mkdir(path)
+    target_path = os.path.join(HERE, directory, guid)
+    try:
+        os.mkdir(target_path)
+    except FileExistsError:
+        pass
 
-    path = os.path.join(path, 'node')
+    target_node_path = os.path.join(target_path, 'node')
 
     try:
-        os.mkdir(path)
+        os.mkdir(target_node_path)
     except FileExistsError:
         pass
 
@@ -29,7 +31,7 @@ def consume_node(guid: str, directory: str, bearer_token: str):
 
     url = f'{settings.OSF_API_URL}{settings.OSF_GUIDS_URL}{guid}'
     response = get_with_retry(url, retry_on=(429, ), headers=auth_header)
-    json_file = os.path.join(path, f'{guid}.json')
+    json_file = os.path.join(target_node_path, f'{guid}.json')
     json_data = response.json()['data']
     with open(json_file, 'w') as json_write:
         json.dump(json_data, json_write)

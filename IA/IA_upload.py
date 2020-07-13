@@ -26,6 +26,11 @@ def gather_and_upload(item_name: str, parent: str, guid: str):
 
     directory_path = os.path.join(HERE, parent)
 
+    '''
+    The slash is added to add just directory contents, not the directory itself.
+    See: https://archive.org/services/docs/api/internetarchive/quickstart.html
+    '''
+
     ia_upload(ia_item, directory_path + '/', session)
     upload_metadata(ia_item, guid, parent, session)
 
