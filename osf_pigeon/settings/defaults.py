@@ -17,4 +17,5 @@ IA_SECRET_KEY = None
 OSF_API_URL = 'https://api.osf.io/'
 OSF_FILES_URL = 'https://files.us.osf.io/'
 
-OSF_USER_THROTTLE_ENABLED = True
+OSF_THROTTLE_ENABLED = True
+THROTTLE_TOKEN = ''  # OSF's throttling token

@@ -11,4 +11,5 @@ DATACITE_PASSWORD = None
 DATACITE_URL = None
 DATACITE_PREFIX = '10.70102'  # Datacite's test DOI prefix
 
-OSF_USER_THROTTLE_ENABLED = False
+OSF_THROTTLE_ENABLED = False
+THROTTLE_TOKEN = ''  # OSF's throttling token
