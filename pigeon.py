@@ -101,14 +101,14 @@ def get_metadata(temp_dir, filename):
     return metadata
 
 
-def modify_metadata_with_retry(ia_item, metadata, retries=2):
+def modify_metadata_with_retry(ia_item, metadata, retries=2, sleep_time=10):
     try:
         ia_item.modify_metadata(metadata)
     except internetarchive.exceptions.ItemLocateError as e:
         if 'Item cannot be located because it is dark' in str(e) and retries > 0:
-            time.sleep(10)
+            time.sleep(sleep_time)
             retries -= 1
-            modify_metadata_with_retry(ia_item, metadata, retries)
+            modify_metadata_with_retry(ia_item, metadata, retries, sleep_time)
         else:
             raise e
 
@@ -140,8 +140,8 @@ def pigeon(guid):
 
         zip_data = create_zip_data(temp_dir)
         ia_item = upload(guid, zip_data)
-        metadata = get_metadata(temp_dir, 'registraton.json')
 
+        metadata = get_metadata(temp_dir, 'registraton.json')
         modify_metadata_with_retry(ia_item, metadata)
 
 

@@ -2,6 +2,8 @@ import os
 import json
 import pytest
 import mock
+import settings
+
 import responses
 import tempfile
 from pigeon import (
@@ -9,24 +11,15 @@ from pigeon import (
     get_and_write_json_to_temp,
     bag_and_tag,
     create_zip_data,
-    upload,
-    get_metadata
+    get_metadata,
+    modify_metadata_with_retry,
 )
-
+import internetarchive
 import zipfile
 
+
+
 HERE = os.path.dirname(os.path.abspath(__file__))
-
-import settings
-
-def node_metadata():
-    with open(os.path.join(HERE, 'fixtures/metadata-resp-with-embeds.json'), 'r') as fp:
-        return json.loads(fp.read())
-
-
-def datacite_xml():
-    with open(os.path.join(HERE, 'fixtures/datacite-metadata.xml'), 'r') as fp:
-        return fp.read()
 
 
 class TestGetAndWriteFileDataToTemp:
@@ -203,10 +196,8 @@ class TestMetadata:
                 fp.write(json_fp.read())
         yield
 
-
-    def test_get(self, guid, temp_dir, test_node_json):
+    def test_get_metadata(self, temp_dir, test_node_json):
         metadata = get_metadata(temp_dir, 'test.json')
-
         assert metadata == {
             'title': 'Test Component',
             'description': 'Test Description',
@@ -215,5 +206,37 @@ class TestMetadata:
             'external-identifier': 'urn:doi:None'
         }
 
+    def test_modify_metadata(self, temp_dir, test_node_json):
+        metadata = {
+            'title': 'Test Component',
+            'description': 'Test Description',
+            'date': '2017-12-20',
+            'contributor': 'Center for Open Science',
+            'external-identifier': 'urn:doi:None'
+        }
+        mock_ia_item = mock.Mock()
+        modify_metadata_with_retry(mock_ia_item,  metadata)
+
+        assert len(mock_ia_item.mock_calls) == 1
+        assert mock_ia_item.mock_calls[0][1][0] == metadata
+
+    def test_modify_metadata_with_retry(self, temp_dir, test_node_json):
+        metadata = {
+            'title': 'Test Component',
+            'description': 'Test Description',
+            'date': '2017-12-20',
+            'contributor': 'Center for Open Science',
+            'external-identifier': 'urn:doi:None'
+        }
+        mock_ia_item = mock.Mock()
+        mock_ia_item.modify_metadata = mock.Mock(side_effect=internetarchive.exceptions.ItemLocateError())
+
+        with pytest.raises(internetarchive.exceptions.ItemLocateError):
+            modify_metadata_with_retry(mock_ia_item,  metadata, sleep_time=1)  # 1 second for fast tests
+
+        assert len(mock_ia_item.mock_calls) == 3
+
+        for call in mock_ia_item.mock_calls:
+            assert call[1][0] == metadata
 
 
