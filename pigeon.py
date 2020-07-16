@@ -33,9 +33,14 @@ def get_and_write_json_to_temp(url, temp_dir, filename):
         fp.write(json.dumps(pages))
 
 
-def bag_and_tag(temp_dir, guid):
+def bag_and_tag(
+        temp_dir,
+        guid,
+        datacite_username=settings.DATACITE_USERNAME,
+        datacite_password=settings.DATACITE_PASSWORD):
+
     doi = build_doi(guid)
-    xml_metadata = get_datacite_metadata(doi)
+    xml_metadata = get_datacite_metadata(doi, datacite_username, datacite_password)
 
     with open(os.path.join(temp_dir, 'datacite.xml'), 'w') as fp:
         fp.write(xml_metadata)
@@ -58,12 +63,12 @@ def create_zip_data(temp_dir):
     return zip_data
 
 
-def upload(guid, zip_data):
+def upload(guid, zip_data, ia_access_key, ia_secret_key, collection_name=None):
     session = internetarchive.get_session(
         config={
             's3': {
-                'access': settings.IA_ACCESS_KEY,
-                'secret': settings.IA_SECRET_KEY
+                'access': ia_access_key,
+                'secret': ia_secret_key
             }
         }
     )
@@ -71,9 +76,9 @@ def upload(guid, zip_data):
 
     ia_item.upload(
         zip_data,
-        headers={'x-archive-meta01-collection': settings.OSF_COLLECTION_NAME},
-        access_key=settings.IA_ACCESS_KEY,
-        secret_key=settings.IA_SECRET_KEY,
+        headers={'x-archive-meta01-collection': collection_name} if collection_name else {},
+        access_key=ia_access_key,
+        secret_key=ia_access_key,
     )
 
     return ia_item
@@ -111,7 +116,12 @@ def modify_metadata_with_retry(ia_item, metadata, retries=2, sleep_time=10):
             raise e
 
 
-def pigeon(guid):
+def pigeon(
+        guid,
+        datacite_username=settings.DATACITE_USERNAME,
+        datacite_password=settings.DATACITE_PASSWORD,
+        ia_access_key=settings.IA_ACCESS_KEY,
+        ia_secret_key=settings.IA_SECRET_KEY):
     with tempfile.TemporaryDirectory() as temp_dir:
         get_and_write_file_data_to_temp(
             f'{settings.OSF_FILES_URL}v1/resources/{guid}/providers/osfstorage/?zip=',
@@ -134,10 +144,16 @@ def pigeon(guid):
             'registraton.json'
         )
 
-        bag_and_tag(temp_dir, guid)
+        bag_and_tag(temp_dir, guid, datacite_username, datacite_password)
 
         zip_data = create_zip_data(temp_dir)
-        ia_item = upload(guid, zip_data)
+        ia_item = upload(
+            guid,
+            zip_data,
+            ia_access_key=ia_access_key,
+            ia_secret_key=ia_secret_key,
+            collection_name=settings.OSF_COLLECTION_NAME
+        )
 
         metadata = get_metadata(temp_dir, 'registraton.json')
         modify_metadata_with_retry(ia_item, metadata)

@@ -23,8 +23,11 @@ def mock_osf_api(guid):
 
 @pytest.fixture
 def mock_datacite(guid):
+    doi = settings.DOI_FORMAT.format(prefix=settings.DATACITE_PREFIX, guid=guid)
     with responses.RequestsMock(assert_all_requests_are_fired=True) as rsps:
-        rsps.add(responses.GET, f'https://mds.test.datacite.org/metadata/10.70102/FK2osf.io/{guid}', status=200)
+        rsps.add(
+            responses.GET,
+            f'{settings.DATACITE_URL}metadata/{doi}', status=200)
         yield rsps
 
 

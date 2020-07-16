@@ -17,8 +17,6 @@ from pigeon import (
 import internetarchive
 import zipfile
 
-
-
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 

@@ -3,11 +3,9 @@
 language: python
 
 python:
-    - "3.6"
     - "3.7"
-    - "3.8"
 
 script:
-    - pip3 install -r requirements.txt
+    - pip3 install -r dev.txt
     - flake8 .
     - python3 -m pytest .

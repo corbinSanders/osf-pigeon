@@ -7,7 +7,6 @@ import settings
 from typing import Tuple, Dict
 from ratelimit import sleep_and_retry
 from ratelimit.exception import RateLimitException
-from functools import wraps
 from datacite import DataCiteMDSClient
 
 
@@ -15,11 +14,11 @@ def build_doi(guid):
     return settings.DOI_FORMAT.format(prefix=settings.DATACITE_PREFIX, guid=guid)
 
 
-def get_datacite_metadata(doi):
+def get_datacite_metadata(doi, datacite_username, datacite_password):
     client = DataCiteMDSClient(
         url=settings.DATACITE_URL,
-        username=settings.DATACITE_USERNAME,
-        password=settings.DATACITE_PASSWORD,
+        username=datacite_username,
+        password=datacite_username,
         prefix=settings.DATACITE_PREFIX,
     )
     return client.metadata_get(doi)
