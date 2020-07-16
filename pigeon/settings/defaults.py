@@ -17,6 +17,5 @@ IA_SECRET_KEY = None
 OSF_API_URL = 'https://api.staging.osf.io/'
 OSF_FILES_URL = 'https://files.us.staging.osf.io/'
 OSF_LOGS_URL = 'v2/registrations/{}/logs/?page[size]={}'
-IA_URL = 's3.us.archive.org'
 
 OSF_THROTTLE_ENABLED = True

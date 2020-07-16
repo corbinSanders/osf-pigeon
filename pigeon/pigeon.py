@@ -71,9 +71,9 @@ def create_zip_data(temp_dir):
     return zip_data
 
 
-def upload(guid, zip_data, ia_access_key, ia_secret_key, collection_name=settings.OSF_COLLECTION_NAME):
+def upload(guid, zip_data, ia_access_key, ia_secret_key, collection_name=None):
     assert isinstance(ia_access_key, str), 'Internet Archive access key was not passed to pigeon'
-    assert isinstance(ia_secret_key, str), 'DaInternet Archive secret key not passed to pigeon'
+    assert isinstance(ia_secret_key, str), 'Internet Archive secret key not passed to pigeon'
     session = internetarchive.get_session(
         config={
             's3': {
