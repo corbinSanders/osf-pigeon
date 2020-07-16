@@ -5,19 +5,44 @@ A utility for archiving OSF data to archive.org
 
 ## Purpose
 
-This is a utility to send data from the OSF to Internet Archive 
+This utility takes a publicly available OSF registration guid as a parameter and using that info alone it will transfer
+that registration, file data, metadata et all to Internet Archive.
 
+# Install
 
-# install
+Simply install the package using python's package manager pip with bash:
+ 
+ `pip3 install osf_pigeon`. 
+ 
+To use for local development just remember to install the developer requirements using 
 
-# use
+`pip3 install -r dev.txt`
 
+# Use
+
+Simply import the module and enter a guid:
+
+```
+from pigeon import pigeon
+
+pigeon('guid0')
+
+```
+
+That's it!
+
+Assuming the registration is fully public and the DOI has been minted properly at datacite. 
 
 ## Running for development
 
 #### Tests
 
-`python3 -m pytest . `
+Running tests are easy enough just:
+
+```
+pip3 install -r dev.txt
+python3 -m pytest . 
+```
 
 #### Linting
 

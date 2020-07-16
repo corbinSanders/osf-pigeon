@@ -6,13 +6,11 @@ from io import BytesIO
 from datetime import datetime
 import argparse
 import internetarchive
-from xml.dom import minidom
-
 
 import tempfile
 import asyncio
 
-from IA.utils import (
+from utils import (
     get_paginated_data,
     get_with_retry,
     build_doi,
