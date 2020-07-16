@@ -85,11 +85,14 @@ async def get_paginated_data(url):
     data = get_with_retry(url, retry_on=(429,)).json()
 
     tasks = []
-    is_paginated = data.get('links', {}).get('next')
+    is_paginated = data['links'].get('next')
 
     if is_paginated:
         result = {1: data['data']}
-        pages = math.ceil(int(data['links']['meta']['total']) / int(data['links']['meta']['per_page']))
+        total = data['links'].get('meta', {}).get('total') or data['meta'].get('total')
+        per_page = data['links'].get('meta', {}).get('per_page') or data['meta'].get('per_page')
+
+        pages = math.ceil(int(total) / int(per_page))
         for i in range(1, pages):
             task = get_pages(url, i + 1, result)
             tasks.append(task)

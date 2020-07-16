@@ -16,7 +16,7 @@ def mock_waterbutler(guid, zip_data):
 
 
 @pytest.fixture
-def mock_osf_api(guid, json_data):
+def mock_osf_api(guid):
     with responses.RequestsMock(assert_all_requests_are_fired=True) as rsps:
         yield rsps
 

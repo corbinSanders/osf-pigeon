@@ -13,6 +13,8 @@ from pigeon import (
     update_metadata
 )
 
+import zipfile
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 import settings
@@ -60,11 +62,15 @@ class TestGetAndWriteJSONToTemp:
         return 'guid0'
 
     @pytest.fixture
+    def file_name(self):
+        return 'info.json'
+
+    @pytest.fixture
     def json_data(self):
-        with open(os.path.join(HERE, 'fixtures/metadata-resp-with-embeds.json'), 'r') as fp:
+        with open(os.path.join(HERE, 'fixtures/metadata-resp-with-embeds.json'), 'rb') as fp:
             return fp.read()
 
-    def test_get_and_write_file_data_to_temp_multipage(self, mock_osf_api, guid, json_data):
+    def test_get_and_write_file_data_to_temp(self, mock_osf_api, guid, json_data, file_name):
         mock_osf_api.add(
             responses.GET,
             f'{settings.OSF_API_URL}v2/guids/{guid}',
@@ -76,21 +82,102 @@ class TestGetAndWriteJSONToTemp:
             get_and_write_json_to_temp(
                 f'{settings.OSF_API_URL}v2/guids/{guid}',
                 temp_dir,
-                'info.json'
+                file_name
             )
             assert len(os.listdir(temp_dir)) == 1
-            assert os.listdir(temp_dir)[0] == 'info.json'
+            assert os.listdir(temp_dir)[0] == file_name
+            info = json.loads(open(os.path.join(temp_dir, file_name)).read())
+            assert info == json.loads(json_data)
 
 
-class TestBagAndTag:
+class TestGetAndWriteJSONToTempMultipage:
 
     @pytest.fixture
     def guid(self):
         return 'guid0'
 
-    def test_bag_and_tag(self, mock_datacite, guid):
+    @pytest.fixture
+    def file_name(self):
+        return 'wikis.json'
+
+    @pytest.fixture
+    def page1(self):
+        with open(os.path.join(HERE, 'fixtures/wiki-metadata-response-page-1.json'), 'r') as fp:
+            return fp.read()
+
+    @pytest.fixture
+    def page2(self):
+        with open(os.path.join(HERE, 'fixtures/wiki-metadata-response-page-2.json'), 'r') as fp:
+            return fp.read()
+
+    @pytest.fixture
+    def expected_json(self, page1, page2):
+        page1 = json.loads(page1)
+        page2 = json.loads(page2)
+
+        return page1['data'] + page2['data']
+
+    def test_get_and_write_file_data_to_temp(self, mock_osf_api, guid, page1, page2, file_name, expected_json):
+        mock_osf_api.add(
+            responses.GET,
+             f'{settings.OSF_API_URL}v2/registrations/{guid}/wikis/',
+            status=200,
+            body=page1
+        )
+        mock_osf_api.add(
+            responses.GET,
+             f'{settings.OSF_API_URL}v2/registrations/{guid}/wikis/',
+            status=200,
+            body=page2
+        )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            get_and_write_json_to_temp(
+                f'{settings.OSF_API_URL}v2/registrations/{guid}/wikis/',
+                temp_dir,
+                file_name
+            )
+            assert len(os.listdir(temp_dir)) == 1
+            assert os.listdir(temp_dir)[0] == file_name
+            info = json.loads(open(os.path.join(temp_dir, file_name)).read())
+            assert len(info) == 11
+            assert info == expected_json
+
+
+class TestBagAndTag:
+
+    @pytest.fixture
+    def guid(self, temp_dir):
+        return 'guid0'
+
+    def test_bag_and_tag(self, guid):
         with tempfile.TemporaryDirectory() as temp_dir:
             with mock.patch('pigeon.bagit.Bag') as mock_bag:
                 bag_and_tag(temp_dir, guid)
                 mock_bag.assert_called_with(temp_dir)
+
+
+class TestCreateZipData:
+
+    @pytest.fixture
+    def temp_dir(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            yield temp_dir
+
+    @pytest.fixture
+    def test_file(self, temp_dir):
+        with open(os.path.join(temp_dir, 'test_file.txt'), 'wb') as fp:
+            fp.write(b'partytime')
+
+
+    def test_create_zip_data(self, temp_dir, test_file):
+        zip_data = create_zip_data(temp_dir)
+
+        zip_file = zipfile.ZipFile(zip_data)
+        assert len(zip_file.infolist()) == 1
+        assert zip_file.infolist()[0].filename == 'test_file.txt'
+        zip_file.extract('test_file.txt', temp_dir)  # just to read
+
+        assert open(os.path.join(temp_dir, 'test_file.txt'), 'rb').read() == b'partytime'
+
 
