@@ -2,10 +2,27 @@ import math
 import time
 import asyncio
 import requests
+import settings
+
 from typing import Tuple, Dict
 from ratelimit import sleep_and_retry
 from ratelimit.exception import RateLimitException
 from functools import wraps
+from datacite import DataCiteMDSClient
+
+
+def build_doi(guid):
+    return settings.DOI_FORMAT.format(prefix=settings.DATACITE_PREFIX, guid=guid)
+
+
+def get_datacite_metadata(doi):
+    client = DataCiteMDSClient(
+        url=settings.DATACITE_URL,
+        username=settings.DATACITE_USERNAME,
+        password=settings.DATACITE_PASSWORD,
+        prefix=settings.DATACITE_PREFIX,
+    )
+    return client.metadata_get(doi)
 
 
 @sleep_and_retry
@@ -17,6 +34,10 @@ def get_with_retry(
 
     if not headers:
         headers = {}
+
+    if not settings.OSF_THROTTLE_ENABLED:
+        assert settings.OSF_BEARER_TOKEN, 'must have OSF_BEARER_TOKEN set to disable throttle'
+        headers['Authorization'] = settings.OSF_BEARER_TOKEN
 
     resp = requests.get(url, headers=headers)
     if resp.status_code in retry_on:
@@ -39,6 +60,10 @@ def put_with_retry(
     if headers is None:
         headers = {}
 
+    if not settings.OSF_THROTTLE_ENABLED:
+        assert settings.OSF_BEARER_TOKEN, 'must have OSF_BEARER_TOKEN set to disable throttle'
+        headers['Authorization'] = settings.OSF_BEARER_TOKEN
+
     resp = requests.put(url, headers=headers, data=data)
     if resp.status_code in retry_on:
         raise RateLimitException(
@@ -57,39 +82,23 @@ async def get_pages(url, page, result={}):
 
 
 async def get_paginated_data(url):
-
     data = get_with_retry(url, retry_on=(429,)).json()
-    result = {1: data['data']}
 
     tasks = []
-    if data['links']['next'] is not None:
-        pages = math.ceil(int(data['meta']['total']) / int(data['meta']['per_page']))
+    is_paginated = data.get('links', {}).get('next')
+
+    if is_paginated:
+        result = {1: data['data']}
+        pages = math.ceil(int(data['links']['meta']['total']) / int(data['links']['meta']['per_page']))
         for i in range(1, pages):
             task = get_pages(url, i + 1, result)
             tasks.append(task)
 
-    await asyncio.gather(*tasks)
-
-    pages_as_list = []
-    # through the magic of async all our pages have loaded.
-    for page in list(result.values()):
-        pages_as_list += page
-
-    return pages_as_list
-
-
-def sleep_and_retry_on(func, retry_on=Exception, sleep=10, retries=3):
-    @wraps(func)
-    def wrapper(*args, **kargs):
-        _retries = retries
-        while True:
-            try:
-                return func(*args, **kargs)
-            except retry_on as e:
-                print(_retries)
-                if _retries < 1:
-                    raise e
-                else:
-                    _retries -= 1
-                time.sleep(sleep)
-    return wrapper
+        await asyncio.gather(*tasks)
+        pages_as_list = []
+        # through the magic of async all our pages have loaded.
+        for page in list(result.values()):
+            pages_as_list += page
+        return pages_as_list
+    else:
+        return data
