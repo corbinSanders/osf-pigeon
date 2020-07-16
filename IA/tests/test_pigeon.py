@@ -10,7 +10,7 @@ from pigeon import (
     bag_and_tag,
     create_zip_data,
     upload,
-    update_metadata
+    get_metadata
 )
 
 import zipfile
@@ -147,10 +147,10 @@ class TestGetAndWriteJSONToTempMultipage:
 class TestBagAndTag:
 
     @pytest.fixture
-    def guid(self, temp_dir):
+    def guid(self):
         return 'guid0'
 
-    def test_bag_and_tag(self, guid):
+    def test_bag_and_tag(self, guid, mock_datacite):
         with tempfile.TemporaryDirectory() as temp_dir:
             with mock.patch('pigeon.bagit.Bag') as mock_bag:
                 bag_and_tag(temp_dir, guid)
@@ -169,7 +169,6 @@ class TestCreateZipData:
         with open(os.path.join(temp_dir, 'test_file.txt'), 'wb') as fp:
             fp.write(b'partytime')
 
-
     def test_create_zip_data(self, temp_dir, test_file):
         zip_data = create_zip_data(temp_dir)
 
@@ -179,5 +178,42 @@ class TestCreateZipData:
         zip_file.extract('test_file.txt', temp_dir)  # just to read
 
         assert open(os.path.join(temp_dir, 'test_file.txt'), 'rb').read() == b'partytime'
+
+
+class TestMetadata:
+
+    @pytest.fixture
+    def guid(self):
+        return 'guid0'
+
+    @pytest.fixture
+    def zip_data(self):
+        return b'Clyde Simmons is underrated'
+
+    @pytest.fixture
+    def temp_dir(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            yield temp_dir
+
+    @pytest.fixture
+    def test_node_json(self, temp_dir):
+        os.mkdir(os.path.join(temp_dir, 'data'))
+        with open(os.path.join(HERE, 'fixtures/metadata-resp-with-embeds.json'), 'rb') as json_fp:
+            with open(os.path.join(temp_dir, 'data', 'test.json'), 'wb') as fp:
+                fp.write(json_fp.read())
+        yield
+
+
+    def test_get(self, guid, temp_dir, test_node_json):
+        metadata = get_metadata(temp_dir, 'test.json')
+
+        assert metadata == {
+            'title': 'Test Component',
+            'description': 'Test Description',
+            'date': '2017-12-20',
+            'contributor': 'Center for Open Science',
+            'external-identifier': 'urn:doi:None'
+        }
+
 
 

@@ -81,8 +81,8 @@ def upload(guid, zip_data):
     return ia_item
 
 
-def update_metadata(temp_dir, ia_item):
-    with open(os.path.join(temp_dir, 'data', 'info.json'), 'r') as f:
+def get_metadata(temp_dir, filename):
+    with open(os.path.join(temp_dir, 'data', filename), 'r') as f:
         node_json = json.loads(f.read())['data']['attributes']
 
     date_string = node_json['date_created']
@@ -93,13 +93,12 @@ def update_metadata(temp_dir, ia_item):
         title=node_json['title'],
         description=node_json['description'],
         date=date_time.strftime("%Y-%m-%d"),
-        subjects=', '.join(node_json['subjects']),
         contributor='Center for Open Science',
     )
 
     article_doi = node_json['article_doi']
     metadata['external-identifier'] = f'urn:doi:{article_doi}'
-    modify_metadata_with_retry(ia_item, metadata)
+    return metadata
 
 
 def modify_metadata_with_retry(ia_item, metadata, retries=2):
@@ -134,14 +133,16 @@ def pigeon(guid):
         get_and_write_json_to_temp(
             f'{settings.OSF_API_URL}v2/guids/{guid}',
             temp_dir,
-            'info.json'
+            'registraton.json'
         )
 
         bag_and_tag(temp_dir, guid)
 
         zip_data = create_zip_data(temp_dir)
         ia_item = upload(guid, zip_data)
-        update_metadata(temp_dir, ia_item)
+        metadata = get_metadata(temp_dir, 'registraton.json')
+
+        modify_metadata_with_retry(ia_item, metadata)
 
 
 if __name__ == '__main__':
