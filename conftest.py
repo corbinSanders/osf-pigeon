@@ -29,5 +29,3 @@ def mock_datacite(guid):
             responses.GET,
             f'{settings.DATACITE_URL}metadata/{doi}', status=200)
         yield rsps
-
-

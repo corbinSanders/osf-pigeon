@@ -108,16 +108,23 @@ class TestGetAndWriteJSONToTempMultipage:
 
         return page1['data'] + page2['data']
 
-    def test_get_and_write_file_data_to_temp(self, mock_osf_api, guid, page1, page2, file_name, expected_json):
+    def test_get_and_write_file_data_to_temp(
+            self,
+            mock_osf_api,
+            guid,
+            page1,
+            page2,
+            file_name,
+            expected_json):
         mock_osf_api.add(
             responses.GET,
-             f'{settings.OSF_API_URL}v2/registrations/{guid}/wikis/',
+            f'{settings.OSF_API_URL}v2/registrations/{guid}/wikis/',
             status=200,
             body=page1
         )
         mock_osf_api.add(
             responses.GET,
-             f'{settings.OSF_API_URL}v2/registrations/{guid}/wikis/',
+            f'{settings.OSF_API_URL}v2/registrations/{guid}/wikis/',
             status=200,
             body=page2
         )
@@ -227,14 +234,18 @@ class TestMetadata:
             'external-identifier': 'urn:doi:None'
         }
         mock_ia_item = mock.Mock()
-        mock_ia_item.modify_metadata = mock.Mock(side_effect=internetarchive.exceptions.ItemLocateError())
+        mock_ia_item.modify_metadata = mock.Mock(
+            side_effect=internetarchive.exceptions.ItemLocateError()
+        )
 
         with pytest.raises(internetarchive.exceptions.ItemLocateError):
-            modify_metadata_with_retry(mock_ia_item,  metadata, sleep_time=1)  # 1 second for fast tests
+            modify_metadata_with_retry(
+                mock_ia_item,
+                metadata,
+                sleep_time=1  # 1 second for fast tests
+            )
 
         assert len(mock_ia_item.mock_calls) == 3
 
         for call in mock_ia_item.mock_calls:
             assert call[1][0] == metadata
-
-
