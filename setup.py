@@ -5,11 +5,8 @@ def parse_requirements(requirements):
     with open(requirements) as fp:
         return [line.strip('\n') for line in fp if line.strip('\n') and not line.startswith('#')]
 
-
-requirements = parse_requirements('requirements.txt')
-
-with open("README.md", "r") as fh:
-    long_description = fh.read()
+with open("README.md", "r") as fp:
+    long_description = fp.read()
 
 setup(
     name='osf_pigeon',
@@ -18,19 +15,14 @@ setup(
     long_description=long_description,
     author='Center for Open Science',
     author_email='contact@cos.io',
-    install_requires=requirements,
+    install_requires=parse_requirements('requirements.txt'),
     url='https://github.com/CenterForOpenScience/osf-pigeon',
     packages=find_packages(exclude=("tests*", )),
-    zip_safe=False,
     classifiers=[
         'Natural Language :: English',
         'Intended Audience :: Developers',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-        'Development Status :: 5 - Production/Stable',
-        'License :: OSI Approved :: Apache Software License',
+        'License :: MIT License',
     ],
     provides=['osf_pigeon']
 )

@@ -37,10 +37,17 @@ def bag_and_tag(
         temp_dir,
         guid,
         datacite_username=settings.DATACITE_USERNAME,
-        datacite_password=settings.DATACITE_PASSWORD):
+        datacite_password=settings.DATACITE_PASSWORD,
+        datacite_prefix=settings.DATACITE_PREFIX
+    ):
 
     doi = build_doi(guid)
-    xml_metadata = get_datacite_metadata(doi, datacite_username, datacite_password)
+    xml_metadata = get_datacite_metadata(
+        doi,
+        datacite_username,
+        datacite_password,
+        datacite_prefix
+    )
 
     with open(os.path.join(temp_dir, 'datacite.xml'), 'w') as fp:
         fp.write(xml_metadata)
@@ -120,8 +127,10 @@ def pigeon(
         guid,
         datacite_username=settings.DATACITE_USERNAME,
         datacite_password=settings.DATACITE_PASSWORD,
+        datacite_prefix=settings.DATACITE_PREFIX,
         ia_access_key=settings.IA_ACCESS_KEY,
-        ia_secret_key=settings.IA_SECRET_KEY):
+        ia_secret_key=settings.IA_SECRET_KEY,):
+
     with tempfile.TemporaryDirectory() as temp_dir:
         get_and_write_file_data_to_temp(
             f'{settings.OSF_FILES_URL}v1/resources/{guid}/providers/osfstorage/?zip=',
@@ -144,7 +153,13 @@ def pigeon(
             'registraton.json'
         )
 
-        bag_and_tag(temp_dir, guid, datacite_username, datacite_password)
+        bag_and_tag(
+            temp_dir,
+            guid,
+            datacite_username=datacite_username,
+            datacite_password=datacite_password,
+            datacite_prefix=datacite_prefix
+        )
 
         zip_data = create_zip_data(temp_dir)
         ia_item = upload(

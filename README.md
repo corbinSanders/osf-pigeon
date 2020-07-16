@@ -20,12 +20,19 @@ To use for local development just remember to install the developer requirements
 
 # Use
 
-Simply import the module and enter a guid:
+Simply import the module and enter a guid with credentials:
 
-```
-from pigeon import pigeon
+```python
+from osf_pigeon import pigeon
 
-pigeon('guid0')
+pigeon(
+    'guid0',
+    datacite_username='test_datacite_username',
+    datacite_password='test_datacite_password',
+    datacite_prefix='test_datacite_prefix',
+    ia_access_key='test_datacite_password',
+    ia_secret_key='test_datacite_password',
+)
 
 ```
 

@@ -13,12 +13,12 @@ def build_doi(guid):
     return settings.DOI_FORMAT.format(prefix=settings.DATACITE_PREFIX, guid=guid)
 
 
-def get_datacite_metadata(doi, datacite_username, datacite_password):
+def get_datacite_metadata(doi, datacite_username, datacite_password, datacite_prefix):
     client = DataCiteMDSClient(
         url=settings.DATACITE_URL,
         username=datacite_username,
-        password=datacite_username,
-        prefix=settings.DATACITE_PREFIX,
+        password=datacite_password,
+        prefix=datacite_prefix,
     )
     return client.metadata_get(doi)
 
