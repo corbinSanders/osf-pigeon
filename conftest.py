@@ -1,6 +1,6 @@
 import pytest
 import responses
-import settings
+from pigeon import settings
 
 
 @pytest.fixture

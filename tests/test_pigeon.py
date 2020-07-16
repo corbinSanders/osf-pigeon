@@ -2,11 +2,11 @@ import os
 import json
 import pytest
 import mock
-import settings
+from pigeon import settings
 
 import responses
 import tempfile
-from pigeon import (
+from pigeon.pigeon import (
     get_and_write_file_data_to_temp,
     get_and_write_json_to_temp,
     bag_and_tag,
