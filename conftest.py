@@ -1,6 +1,6 @@
 import pytest
 import responses
-from pigeon import settings
+from osf_pigeon import settings
 
 
 @pytest.fixture

@@ -2,11 +2,11 @@ import os
 import json
 import pytest
 import mock
-from pigeon import settings
+from osf_pigeon import settings
 
 import responses
 import tempfile
-from pigeon.pigeon import (
+from osf_pigeon.pigeon import (
     get_and_write_file_data_to_temp,
     get_and_write_json_to_temp,
     bag_and_tag,
@@ -150,7 +150,7 @@ class TestBagAndTag:
 
     def test_bag_and_tag(self, guid, mock_datacite):
         with tempfile.TemporaryDirectory() as temp_dir:
-            with mock.patch('pigeon.bagit.Bag') as mock_bag:
+            with mock.patch('bagit.Bag') as mock_bag:
                 bag_and_tag(temp_dir, guid)
                 mock_bag.assert_called_with(temp_dir)
 

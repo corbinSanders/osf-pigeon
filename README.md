@@ -25,6 +25,14 @@ To use for local development just remember to install the developer requirements
 Use
 ============
 
+This should be able to export registrations from 
+Assuming the registration is fully public and the DOI has been minted properly at datacite. 
+
+
+Run from package
+============
+
+
 Simply import the module and enter a guid with credentials::
 
  from osf_pigeon import pigeon
@@ -40,7 +48,13 @@ Simply import the module and enter a guid with credentials::
 
 That's it!
 
-Assuming the registration is fully public and the DOI has been minted properly at datacite. 
+Run as script
+============
+
+To run as script just -m to execute the module:
+
+ python3 -m osf_pigeon -g u8p3q 
+
 
 Running in development
 ========================

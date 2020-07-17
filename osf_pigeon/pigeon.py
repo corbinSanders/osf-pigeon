@@ -4,7 +4,6 @@ import json
 import os
 from io import BytesIO
 from datetime import datetime
-import argparse
 import internetarchive
 
 import tempfile
@@ -17,7 +16,7 @@ from ratelimit import sleep_and_retry
 from ratelimit.exception import RateLimitException
 from datacite import DataCiteMDSClient
 
-import settings
+from osf_pigeon import settings
 import zipfile
 import bagit
 
@@ -126,7 +125,7 @@ def modify_metadata_with_retry(ia_item, metadata, retries=2, sleep_time=10):
             raise e
 
 
-def pigeon(
+def main(
         guid,
         datacite_username=settings.DATACITE_USERNAME,
         datacite_password=settings.DATACITE_PASSWORD,
@@ -276,14 +275,3 @@ async def get_paginated_data(url):
         return data
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '-g',
-        '--guid',
-        help='This is the GUID of the target node on the OSF',
-        required=True
-    )
-    args = parser.parse_args()
-    guid = args.guid
-    pigeon(guid)

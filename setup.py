@@ -12,7 +12,7 @@ with open(os.path.join(this_directory, 'README.md'), encoding='utf-8') as fp:
 
 setup(
     name='osf_pigeon',
-    version='0.0.6',
+    version='0.0.9',
     description='A utility for archiving osf storage projects at archive.org',
     long_description=long_description,
     author='Center for Open Science',
@@ -20,7 +20,7 @@ setup(
     install_requires=parse_requirements('requirements.txt'),
     url='https://github.com/CenterForOpenScience/osf-pigeon',
     packages=find_packages(exclude=("tests*", )),
-    py_modules=['pigeon.pigeon'],
+    py_modules=['__main__'],
     include_package_data=True,
     zip_safe=False,
     classifiers=[
