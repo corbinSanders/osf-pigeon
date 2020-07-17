@@ -164,12 +164,24 @@ def main(
         )
 
         zip_data = create_zip_data(temp_dir)
-        ia_item = upload(
-            guid,
+
+        assert isinstance(ia_access_key, str), 'Internet Archive access key was not passed to pigeon'
+        assert isinstance(ia_secret_key, str), 'Internet Archive secret key not passed to pigeon'
+        session = internetarchive.get_session(
+            config={
+                's3': {
+                    'access': ia_access_key,
+                    'secret': ia_secret_key
+                }
+            }
+        )
+        ia_item = session.get_item(guid)
+
+        ia_item.upload(
             zip_data,
-            ia_access_key=ia_access_key,
-            ia_secret_key=ia_secret_key,
-            collection_name=settings.OSF_COLLECTION_NAME
+            headers={'x-archive-meta01-collection': settings.OSF_COLLECTION_NAME},
+            access_key=ia_access_key,
+            secret_key=ia_secret_key,
         )
 
         metadata = get_metadata(temp_dir, 'registraton.json')
