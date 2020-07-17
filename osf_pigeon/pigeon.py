@@ -1,5 +1,4 @@
 import re
-import time
 import json
 import os
 from io import BytesIO
@@ -38,8 +37,7 @@ def bag_and_tag(
         guid,
         datacite_username=settings.DATACITE_USERNAME,
         datacite_password=settings.DATACITE_PASSWORD,
-        datacite_prefix=settings.DATACITE_PREFIX
-    ):
+        datacite_prefix=settings.DATACITE_PREFIX):
 
     doi = build_doi(guid)
     xml_metadata = get_datacite_metadata(
@@ -59,7 +57,6 @@ def bag_and_tag(
 
 def create_zip_data(temp_dir):
     zip_data = BytesIO()
-    zip_data.name = 'bag.zip'
     with zipfile.ZipFile(zip_data, "w") as zip_file:
         for root, dirs, files in os.walk(temp_dir):
             for file in files:
@@ -86,20 +83,10 @@ def get_metadata(temp_dir, filename):
     )
 
     article_doi = node_json['article_doi']
-    metadata['external-identifier'] = f'urn:doi:{article_doi}'
+    if article_doi:
+        metadata['external-identifier'] = f'urn:doi:{article_doi}'
+
     return metadata
-
-
-def modify_metadata_with_retry(ia_item, metadata, retries=2, sleep_time=60):
-    try:
-        ia_item.modify_metadata(metadata)
-    except internetarchive.exceptions.ItemLocateError as e:
-        if 'Item cannot be located because it is dark' in str(e) and retries > 0:
-            time.sleep(sleep_time)
-            retries -= 1
-            modify_metadata_with_retry(ia_item, metadata, retries, sleep_time)
-        else:
-            raise e
 
 
 def main(
@@ -129,7 +116,7 @@ def main(
         get_and_write_json_to_temp(
             f'{settings.OSF_API_URL}v2/guids/{guid}',
             temp_dir,
-            'registraton.json'
+            'registration.json'
         )
 
         bag_and_tag(
@@ -142,8 +129,11 @@ def main(
 
         zip_data = create_zip_data(temp_dir)
 
-        assert isinstance(ia_access_key, str), 'Internet Archive access key was not passed to pigeon'
-        assert isinstance(ia_secret_key, str), 'Internet Archive secret key not passed to pigeon'
+        assert isinstance(ia_access_key, str),\
+            'Internet Archive access key was not passed to pigeon'
+        assert isinstance(ia_secret_key, str), \
+            'Internet Archive secret key not passed to pigeon'
+
         session = internetarchive.get_session(
             config={
                 's3': {
@@ -153,17 +143,15 @@ def main(
             }
         )
         ia_item = session.get_item(guid)
+        metadata = get_metadata(temp_dir, 'registration.json')
 
         ia_item.upload(
-            zip_data,
+            {'bag.zip': zip_data},
+            metadata=metadata,
             headers={'x-archive-meta01-collection': settings.OSF_COLLECTION_NAME},
             access_key=ia_access_key,
             secret_key=ia_secret_key,
         )
-
-        metadata = get_metadata(temp_dir, 'registraton.json')
-        modify_metadata_with_retry(ia_item, metadata)
-
 
 
 def build_doi(guid):
@@ -264,5 +252,3 @@ async def get_paginated_data(url):
         return pages_as_list
     else:
         return data
-
-

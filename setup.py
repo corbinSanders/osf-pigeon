@@ -6,8 +6,9 @@ def parse_requirements(requirements):
     with open(requirements) as fp:
         return [line.strip('\n') for line in fp if line.strip('\n') and not line.startswith('#')]
 
-this_directory = os.path.abspath(os.path.dirname(__file__))
-with open(os.path.join(this_directory, 'README.md'), encoding='utf-8') as fp:
+
+HERE = os.path.abspath(os.path.dirname(__file__))
+with open(os.path.join(HERE, 'README.md'), encoding='utf-8') as fp:
     long_description = fp.read()
 
 setup(

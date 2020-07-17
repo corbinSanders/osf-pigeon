@@ -35,9 +35,9 @@ Run from package
 
 Simply import the module and enter a guid with credentials::
 
- from osf_pigeon import pigeon
+ from osf_pigeon.pigeon import main
 
- pigeon(
+ main(
     'guid0',
     datacite_username='test_datacite_username',
     datacite_password='test_datacite_password',
