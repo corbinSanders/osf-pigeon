@@ -196,31 +196,6 @@ def get_with_retry(
     return resp
 
 
-@sleep_and_retry
-def put_with_retry(
-        url: str,
-        data: bytes,
-        headers: dict = None,
-        retry_on: Tuple[int] = (),
-        sleep_period: int = None) -> requests.Response:
-
-    if headers is None:
-        headers = {}
-
-    if not settings.OSF_THROTTLE_ENABLED:
-        assert settings.OSF_BEARER_TOKEN, 'must have OSF_BEARER_TOKEN set to disable throttle'
-        headers['Authorization'] = settings.OSF_BEARER_TOKEN
-
-    resp = requests.put(url, headers=headers, data=data)
-    if resp.status_code in retry_on:
-        raise RateLimitException(
-            message='Too many requests, sleeping.',
-            period_remaining=sleep_period or int(resp.headers.get('Retry-After') or 0)
-        )  # This will be caught by @sleep_and_retry and retried
-
-    return resp
-
-
 async def get_pages(url, page, result={}):
     url = f'{url}?page={page}'
     resp = get_with_retry(url, retry_on=(429,))
