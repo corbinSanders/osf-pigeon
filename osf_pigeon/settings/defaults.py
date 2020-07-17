@@ -1,6 +1,6 @@
 # New tokens can be found at https://archive.org/account/s3.php
 
-DOI_FORMAT = '{prefix}/fk2osf.io/{guid}'
+DOI_FORMAT = '{prefix}/osf.io/{guid}'
 
 DATACITE_USERNAME = None
 DATACITE_PASSWORD = None
@@ -14,7 +14,7 @@ OSF_BEARER_TOKEN = None
 IA_ACCESS_KEY = None
 IA_SECRET_KEY = None
 
-OSF_API_URL = 'https://api.staging.osf.io/'
-OSF_FILES_URL = 'https://files.us.staging.osf.io/'
+OSF_API_URL = 'https://api.osf.io/'
+OSF_FILES_URL = 'https://files.us.osf.io/'
 
 OSF_THROTTLE_ENABLED = True

@@ -151,7 +151,7 @@ class TestBagAndTag:
     def test_bag_and_tag(self, guid, mock_datacite):
         with tempfile.TemporaryDirectory() as temp_dir:
             with mock.patch('bagit.Bag') as mock_bag:
-                bag_and_tag(temp_dir, guid)
+                bag_and_tag(temp_dir, guid, datacite_password='test', datacite_username='test')
                 mock_bag.assert_called_with(temp_dir)
 
 

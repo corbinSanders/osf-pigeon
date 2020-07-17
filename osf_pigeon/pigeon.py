@@ -70,29 +70,6 @@ def create_zip_data(temp_dir):
     return zip_data
 
 
-def upload(guid, zip_data, ia_access_key, ia_secret_key, collection_name=None):
-    assert isinstance(ia_access_key, str), 'Internet Archive access key was not passed to pigeon'
-    assert isinstance(ia_secret_key, str), 'Internet Archive secret key not passed to pigeon'
-    session = internetarchive.get_session(
-        config={
-            's3': {
-                'access': ia_access_key,
-                'secret': ia_secret_key
-            }
-        }
-    )
-    ia_item = session.get_item(guid)
-
-    ia_item.upload(
-        zip_data,
-        headers={'x-archive-meta01-collection': collection_name} if collection_name else {},
-        access_key=ia_access_key,
-        secret_key=ia_access_key,
-    )
-
-    return ia_item
-
-
 def get_metadata(temp_dir, filename):
     with open(os.path.join(temp_dir, 'data', filename), 'r') as f:
         node_json = json.loads(f.read())['data']['attributes']
@@ -113,7 +90,7 @@ def get_metadata(temp_dir, filename):
     return metadata
 
 
-def modify_metadata_with_retry(ia_item, metadata, retries=2, sleep_time=10):
+def modify_metadata_with_retry(ia_item, metadata, retries=2, sleep_time=60):
     try:
         ia_item.modify_metadata(metadata)
     except internetarchive.exceptions.ItemLocateError as e:
@@ -188,6 +165,7 @@ def main(
         modify_metadata_with_retry(ia_item, metadata)
 
 
+
 def build_doi(guid):
     return settings.DOI_FORMAT.format(prefix=settings.DATACITE_PREFIX, guid=guid)
 
@@ -225,6 +203,7 @@ def get_with_retry(
             message='Too many requests, sleeping.',
             period_remaining=sleep_period or int(resp.headers.get('Retry-After') or 0)
         )  # This will be caught by @sleep_and_retry and retried
+    resp.raise_for_status()
 
     return resp
 
