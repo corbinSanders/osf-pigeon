@@ -1,4 +1,5 @@
 import re
+import time
 import json
 import os
 from io import BytesIO
@@ -89,6 +90,18 @@ def get_metadata(temp_dir, filename):
     return metadata
 
 
+def modify_metadata_with_retry(ia_item, metadata, retries=2, sleep_time=60):
+    try:
+        ia_item.modify_metadata(metadata)
+    except internetarchive.exceptions.ItemLocateError as e:
+        if 'Item cannot be located because it is dark' in str(e) and retries > 0:
+            time.sleep(sleep_time)
+            retries -= 1
+            modify_metadata_with_retry(ia_item, metadata, retries, sleep_time)
+        else:
+            raise e
+
+
 def main(
         guid,
         datacite_username=settings.DATACITE_USERNAME,
@@ -152,6 +165,7 @@ def main(
             access_key=ia_access_key,
             secret_key=ia_secret_key,
         )
+        modify_metadata_with_retry(ia_item, metadata)
 
 
 def build_doi(guid):

@@ -12,7 +12,9 @@ from osf_pigeon.pigeon import (
     bag_and_tag,
     create_zip_data,
     get_metadata,
+    modify_metadata_with_retry,
 )
+import internetarchive
 import zipfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -149,7 +151,7 @@ class TestBagAndTag:
     def test_bag_and_tag(self, guid, mock_datacite):
         with tempfile.TemporaryDirectory() as temp_dir:
             with mock.patch('bagit.Bag') as mock_bag:
-                bag_and_tag(temp_dir, guid, datacite_password='test', datacite_username='test')
+                bag_and_tag(temp_dir, guid, 'test datcite password', 'test datcite username')
                 mock_bag.assert_called_with(temp_dir)
 
 
@@ -195,15 +197,52 @@ class TestMetadata:
     def test_node_json(self, temp_dir):
         os.mkdir(os.path.join(temp_dir, 'data'))
         with open(os.path.join(HERE, 'fixtures/metadata-resp-with-embeds.json'), 'rb') as json_fp:
-            with open(os.path.join(temp_dir, 'data', 'registration.json'), 'wb') as fp:
+            with open(os.path.join(temp_dir, 'data', 'test.json'), 'wb') as fp:
                 fp.write(json_fp.read())
         yield
 
     def test_get_metadata(self, temp_dir, test_node_json):
-        metadata = get_metadata(temp_dir, 'registration.json')
+        metadata = get_metadata(temp_dir, 'test.json')
         assert metadata == {
             'title': 'Test Component',
             'description': 'Test Description',
             'date': '2017-12-20',
             'contributor': 'Center for Open Science',
         }
+
+    def test_modify_metadata(self, temp_dir, test_node_json):
+        metadata = {
+            'title': 'Test Component',
+            'description': 'Test Description',
+            'date': '2017-12-20',
+            'contributor': 'Center for Open Science',
+        }
+        mock_ia_item = mock.Mock()
+        modify_metadata_with_retry(mock_ia_item,  metadata)
+
+        assert len(mock_ia_item.mock_calls) == 1
+        assert mock_ia_item.mock_calls[0][1][0] == metadata
+
+    def test_modify_metadata_with_retry(self, temp_dir, test_node_json):
+        metadata = {
+            'title': 'Test Component',
+            'description': 'Test Description',
+            'date': '2017-12-20',
+            'contributor': 'Center for Open Science',
+        }
+        mock_ia_item = mock.Mock()
+        mock_ia_item.modify_metadata = mock.Mock(
+            side_effect=internetarchive.exceptions.ItemLocateError()
+        )
+
+        with pytest.raises(internetarchive.exceptions.ItemLocateError):
+            modify_metadata_with_retry(
+                mock_ia_item,
+                metadata,
+                sleep_time=1  # 1 second for fast tests
+            )
+
+        assert len(mock_ia_item.mock_calls) == 3
+
+        for call in mock_ia_item.mock_calls:
+            assert call[1][0] == metadata
