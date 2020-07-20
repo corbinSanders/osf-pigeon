@@ -11,25 +11,25 @@ if __name__ == '__main__':
         required=True
     )
     parser.add_argument(
-        '-dp',
+        '-d',
         '--datacite_password',
         help='This is the password for using datacite\'s api',
         required=False
     )
     parser.add_argument(
-        '-du',
+        '-u',
         '--datacite_username',
         help='This is the username for using datacite\'s api',
         required=False
     )
     parser.add_argument(
-        '-iaak',
+        '-a',
         '--ia_access_key',
         help='This is the access key for using Internet Archive\'s api',
         required=False
     )
     parser.add_argument(
-        '-iask',
+        '-s',
         '--ia_secret_key',
         help='This is the secret key for using Internet Archive\'s api',
         required=False

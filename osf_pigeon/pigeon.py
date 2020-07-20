@@ -108,7 +108,10 @@ def main(
         datacite_password=settings.DATACITE_PASSWORD,
         datacite_prefix=settings.DATACITE_PREFIX,
         ia_access_key=settings.IA_ACCESS_KEY,
-        ia_secret_key=settings.IA_SECRET_KEY,):
+        ia_secret_key=settings.IA_SECRET_KEY):
+
+    assert isinstance(ia_access_key, str), 'Internet Archive access key was not passed to pigeon'
+    assert isinstance(ia_secret_key, str), 'Internet Archive secret key not passed to pigeon'
 
     with tempfile.TemporaryDirectory() as temp_dir:
         get_and_write_file_data_to_temp(
@@ -141,11 +144,6 @@ def main(
         )
 
         zip_data = create_zip_data(temp_dir)
-
-        assert isinstance(ia_access_key, str),\
-            'Internet Archive access key was not passed to pigeon'
-        assert isinstance(ia_secret_key, str), \
-            'Internet Archive secret key not passed to pigeon'
 
         session = internetarchive.get_session(
             config={
@@ -195,8 +193,9 @@ def get_with_retry(
     if not headers:
         headers = {}
 
-    if not settings.OSF_THROTTLE_ENABLED:
-        assert settings.OSF_BEARER_TOKEN, 'must have OSF_BEARER_TOKEN set to disable throttle'
+    if not settings.OSF_USER_THROTTLE_ENABLED:
+        assert settings.OSF_BEARER_TOKEN, \
+            'must have OSF_BEARER_TOKEN set to disable the api user throttle of the OSF'
         headers['Authorization'] = settings.OSF_BEARER_TOKEN
 
     resp = requests.get(url, headers=headers)
