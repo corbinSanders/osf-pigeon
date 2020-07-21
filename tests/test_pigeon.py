@@ -142,6 +142,60 @@ class TestGetAndWriteJSONToTempMultipage:
             assert info == expected_json
 
 
+class TestContributors:
+
+    @pytest.fixture
+    def guid(self):
+        return 'ft3ae'
+
+    @pytest.fixture
+    def file_name(self):
+        return 'contributors.json'
+
+    @pytest.fixture
+    def contributors_file(self):
+        with open(os.path.join(HERE, 'fixtures/ft3ae-contributors.json'), 'r') as fp:
+            return fp.read()
+
+    @pytest.fixture
+    def institutions_file(self):
+        with open(os.path.join(HERE, 'fixtures/ft3ae-institutions.json'), 'r') as fp:
+            return fp.read()
+
+    def test_get_and_write_file_data_to_temp(
+            self,
+            mock_osf_api,
+            guid,
+            contributors_file,
+            institutions_file,
+            file_name):
+        mock_osf_api.add(
+            responses.GET,
+            f'{settings.OSF_API_URL}v2/registrations/{guid}/contributors/',
+            status=200,
+            body=contributors_file
+        )
+        mock_osf_api.add(
+            responses.GET,
+            'http://localhost:8000/v2/users/s3rbx/institutions/',
+            status=200,
+            body=institutions_file
+        )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            get_and_write_json_to_temp(
+                f'{settings.OSF_API_URL}v2/registrations/{guid}/contributors/',
+                temp_dir,
+                file_name
+            )
+            assert len(os.listdir(temp_dir)) == 1
+            assert os.listdir(temp_dir)[0] == file_name
+            info = json.loads(open(os.path.join(temp_dir, file_name)).read())['data']
+            assert len(info) == 1
+            assert info[0]['ORCiD'] == '0000-0001-4934-3444'
+            assert info[0]['affiliated_institutions'] == ['Center For Open Science']
+
+
 class TestBagAndTag:
 
     @pytest.fixture

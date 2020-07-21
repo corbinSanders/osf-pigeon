@@ -134,6 +134,11 @@ def main(
             temp_dir,
             'registration.json'
         )
+        get_and_write_json_to_temp(
+            f'{settings.OSF_API_URL}v2/registrations/{guid}/contributors/',
+            temp_dir,
+            'contributors.json'
+        )
 
         bag_and_tag(
             temp_dir,
@@ -212,8 +217,35 @@ def get_with_retry(
 async def get_pages(url, page, result={}):
     url = f'{url}?page={page}'
     resp = get_with_retry(url, retry_on=(429,))
-    result[page] = resp.json()['data']
+
+    if 'contributors' in url:
+        result[page] = get_contributors(resp.json())['data']
+    else:
+        result[page] = resp.json()['data']
     return result
+
+
+def get_contributors(response):
+    json_data = response['data']
+    contributor_data_list = []
+    for contributor in json_data:
+        contributor_data = {}
+        embed_data = contributor['embeds']['users']['data']
+        contributor_data['ORCiD'] = embed_data['attributes']['social'].get('orcid', None)
+        contributor_data['name'] = embed_data['attributes']['full_name']
+        links = embed_data['relationships']['institutions']['links']
+        institution_url = links['related']['href']
+        institution_response = get_with_retry(
+            institution_url, retry_on=(429, ))
+        institution_data = institution_response.json()['data']
+        institution_list = [
+            institution['attributes']['name']
+            for institution in institution_data
+        ]
+        contributor_data['affiliated_institutions'] = institution_list
+        contributor_data_list.append(contributor_data)
+    response['data'] = contributor_data_list
+    return response
 
 
 async def get_paginated_data(url):
@@ -221,6 +253,9 @@ async def get_paginated_data(url):
 
     tasks = []
     is_paginated = data.get('links', {}).get('next')
+
+    if 'contributors' in url:
+        data = get_contributors(data)
 
     if is_paginated:
         result = {1: data['data']}
