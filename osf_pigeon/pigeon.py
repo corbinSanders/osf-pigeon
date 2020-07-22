@@ -27,8 +27,8 @@ def get_and_write_file_data_to_temp(url, temp_dir, dir_name):
         fp.write(response.content)
 
 
-def get_and_write_json_to_temp(url, temp_dir, filename):
-    pages = asyncio.run(get_paginated_data(url))
+def get_and_write_json_to_temp(url, temp_dir, filename, parse_json=None):
+    pages = asyncio.run(get_paginated_data(url, parse_json))
     with open(os.path.join(temp_dir, filename), 'w') as fp:
         fp.write(json.dumps(pages))
 
@@ -137,7 +137,8 @@ def main(
         get_and_write_json_to_temp(
             f'{settings.OSF_API_URL}v2/registrations/{guid}/contributors/',
             temp_dir,
-            'contributors.json'
+            'contributors.json',
+            parse_json=get_contributors
         )
 
         bag_and_tag(
@@ -214,21 +215,21 @@ def get_with_retry(
     return resp
 
 
-async def get_pages(url, page, result={}):
+async def get_pages(url, page, result={}, parse_json=None):
     url = f'{url}?page={page}'
     resp = get_with_retry(url, retry_on=(429,))
 
-    if 'contributors' in url:
-        result[page] = get_contributors(resp.json())['data']
-    else:
-        result[page] = resp.json()['data']
+    result[page] = resp.json()['data']
+
+    if parse_json:
+        result[page] = parse_json(resp.json())['data']
+
     return result
 
 
 def get_contributors(response):
-    json_data = response['data']
     contributor_data_list = []
-    for contributor in json_data:
+    for contributor in response['data']:
         contributor_data = {}
         embed_data = contributor['embeds']['users']['data']
         contributor_data['ORCiD'] = embed_data['attributes']['social'].get('orcid', None)
@@ -248,14 +249,14 @@ def get_contributors(response):
     return response
 
 
-async def get_paginated_data(url):
+async def get_paginated_data(url, parse_json=None):
     data = get_with_retry(url, retry_on=(429,)).json()
 
     tasks = []
     is_paginated = data.get('links', {}).get('next')
 
-    if 'contributors' in url:
-        data = get_contributors(data)
+    if parse_json:
+        data = parse_json(data)
 
     if is_paginated:
         result = {1: data['data']}

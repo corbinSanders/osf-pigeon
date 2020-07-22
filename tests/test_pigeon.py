@@ -13,6 +13,7 @@ from osf_pigeon.pigeon import (
     create_zip_data,
     get_metadata,
     modify_metadata_with_retry,
+    get_contributors
 )
 import internetarchive
 import zipfile
@@ -186,7 +187,8 @@ class TestContributors:
             get_and_write_json_to_temp(
                 f'{settings.OSF_API_URL}v2/registrations/{guid}/contributors/',
                 temp_dir,
-                file_name
+                file_name,
+                parse_json=get_contributors
             )
             assert len(os.listdir(temp_dir)) == 1
             assert os.listdir(temp_dir)[0] == file_name
